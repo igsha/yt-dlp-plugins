@@ -38,7 +38,7 @@ class KodikListIE(InfoExtractor):
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
-        domain = re.search(self._VALID_URL, url).group('domain')
+        domain = self._search_regex(self._VALID_URL, url, "domain", group='domain')
 
         webpage = self._download_webpage(url, video_id, headers={'referer': domain})
         t = etree.HTML(webpage)
