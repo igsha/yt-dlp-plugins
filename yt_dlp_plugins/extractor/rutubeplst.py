@@ -1,5 +1,5 @@
 from yt_dlp.extractor.common import InfoExtractor
-import re
+
 
 class RutubePlstIE(InfoExtractor):
     _VALID_URL = r'(?:https?://)?(?:www\.)?rutube\.ru/plst/(?P<id>[\d]+)/'
