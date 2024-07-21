@@ -10,7 +10,7 @@ class RutubePlstIE(InfoExtractor):
         # Remove JSONDecodeError blocks (quote in quotes).
         webpage = webpage.replace(r'\x', "")
 
-        playlist = self._search_json('window.reduxState\s*=\s*', webpage, 'JSON', video_id)
+        playlist = self._search_json(r'window.reduxState\s*=\s*', webpage, 'JSON', video_id)
         title = self._html_extract_title(webpage)
         self.report_extraction(title)
 
