@@ -1,4 +1,5 @@
 from yt_dlp.extractor.common import InfoExtractor
+import sys
 
 
 class RutubePlstIE(InfoExtractor):
@@ -14,8 +15,12 @@ class RutubePlstIE(InfoExtractor):
         title = self._html_extract_title(webpage)
         self.report_extraction(title)
 
-        query_name = f"getPlaylistVideos/{video_id}"
-        videos = playlist['api']['queries'][query_name]['data']['results']
+        videos = None
+        for query, val in playlist['api']['queries'].items():
+            if query.startswith("getPlaylistVideos") and video_id in query:
+                videos = val['data']['results']
+                break
+
         urls = [self.url_result(ep['video_url'], id=ep['id'], title=ep['title'], duration=ep['duration'])
                 for ep in videos]
 
