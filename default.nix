@@ -2,7 +2,7 @@
 
 buildPythonPackage {
   pname = "yt-dlp-plugins";
-  version = "2024.07.21";
+  version = "2024.08.04";
   format = "pyproject";
 
   src = ./.;

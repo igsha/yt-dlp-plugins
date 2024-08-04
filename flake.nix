@@ -12,14 +12,16 @@
           yt-dlp-plugins = pfinal.callPackage ./. { };
         })
       ];
-      yt-dlp-with-plugins = prev.symlinkJoin {
+      yt-dlp-with-plugins = let
+        # extract appropriate python3Packages
+        pp = with builtins; head (filter (x: x.pname == "python3") final.yt-dlp.propagatedBuildInputs);
+      in prev.symlinkJoin {
         name = "yt-dlp-with-plugins";
-        paths = [ prev.yt-dlp ];
+        paths = [ final.yt-dlp ];
         buildInputs = [ prev.makeWrapper ];
-        # Somehow need to get python from yt-dlp
         postBuild = ''
           wrapProgram $out/bin/yt-dlp \
-            --prefix PYTHONPATH : "${toPathWithSep final.python3Packages.yt-dlp-plugins}"
+            --prefix PYTHONPATH : "${toPathWithSep final.${pp.pythonAttr}.pkgs.yt-dlp-plugins}"
         '';
       };
     };
