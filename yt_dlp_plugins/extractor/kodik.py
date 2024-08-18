@@ -55,3 +55,24 @@ class KodikListIE(InfoExtractor):
             urls.append(self.url_result(f"{domain}/ftor?{parse.urlencode(params)}", ie=KodikIE.ie_key(), title=item.get('data-title')))
 
         return self.playlist_result(urls, video_id, title, playlist_count=len(urls))
+
+
+class KodikVideoIE(InfoExtractor):
+    _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/video/(?P<id>[-\w/]+)'
+
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
+        domain = self._search_regex(self._VALID_URL, url, "domain", group='domain')
+
+        webpage = self._download_webpage(url, video_id, headers={'referer': domain})
+
+        title = "Video"
+        video_type = self._search_regex(r"videoInfo\.type\s*=\s*'(?P<type>[^']+)'", webpage, "type", group='type')
+        video_hash = self._search_regex(r"videoInfo\.hash\s*=\s*'(?P<hash>[^']+)'", webpage, "hash", group='hash')
+        video_id = self._search_regex(r"videoInfo\.id\s*=\s*'(?P<id>[^']+)'", webpage, "id", group='id')
+
+        self.report_extraction(video_id)
+
+        params = {'id': video_id, 'hash': video_hash, 'type': video_type}
+        urls = [self.url_result(f"{domain}/ftor?{parse.urlencode(params)}", ie=KodikIE.ie_key(), title=title)]
+        return self.playlist_result(urls, video_id, title, playlist_count=len(urls))
