@@ -35,7 +35,8 @@ class KodikIE(InfoExtractor):
 
 
 class KodikVideoIE(InfoExtractor):
-    _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/(video|seria)/(?P<id>[-\w/]+)'
+    _VALID_URL = r'(?P<domain>(?:https?:)?(?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/(video|seria)/(?P<id>[-\w/]+)(?:\?.*)?'
+    _EMBED_REGEX = [rf'(?x)<iframe[^>]+src=["\'](?P<url>{_VALID_URL})']
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
@@ -53,9 +54,8 @@ class KodikVideoIE(InfoExtractor):
 
         self.report_extraction(video_id)
 
-        params = {'id': video_id, 'hash': video_hash, 'type': video_type, 'title': title}
-        urls = [self.url_result(f"{domain}/ftor?{parse.urlencode(params)}", ie=KodikIE.ie_key(), title=title)]
-        return self.playlist_result(urls, video_id, title, playlist_count=len(urls))
+        params = dict(id=video_id, hash=video_hash, type=video_type, title=title)
+        return self.url_result(f"{domain}/ftor?{parse.urlencode(params)}", ie=KodikIE.ie_key(), title=title, transparent=True)
 
 
 class KodikListIE(InfoExtractor):
