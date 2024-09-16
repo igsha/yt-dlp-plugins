@@ -12,7 +12,8 @@ class KodikIE(InfoExtractor):
 
     @staticmethod
     def __decode(data):
-        decoded = base64.b64decode(data.translate(__class__._decode_table))
+        data = data.translate(__class__._decode_table)
+        decoded = base64.b64decode(data + '=' * (-len(data) % 4)) # fix padding
         return re.sub(r'^//', 'https://', decoded.decode())
 
     def _real_extract(self, url):
