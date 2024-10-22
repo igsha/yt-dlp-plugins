@@ -1,15 +1,18 @@
 from yt_dlp.extractor.common import InfoExtractor
+import re
 
 
 class OpenLoadIE(InfoExtractor):
-    _VALID_URL = r'(?:https?://)?(?:www\.)?.+?/detail.php\?vid=(?P<id>[\dA-Z=]+?)'
+    _VALID_URL = False
 
-    def _real_extract(self, url):
-        video_id = self._match_id(url)
-        webpage = self._download_webpage(url, video_id)
+    def _extract_from_webpage(self, url, webpage):
+        video_id = url
         url = self._html_search_regex(r'"file":\s*"(http.*?openload[^"]+)"', webpage, video_id)
+        if url is None:
+            return
+
         self.report_extraction(video_id)
 
         # to avoid 'direct' flag for mpv
         urls = [self.url_result(url)]
-        return self.playlist_result(urls, video_id, playlist_count=1)
+        yield self.playlist_result(urls, video_id, playlist_count=1)
