@@ -1,5 +1,4 @@
 from yt_dlp.extractor.common import InfoExtractor
-import re
 
 
 class OpenLoadIE(InfoExtractor):
@@ -7,7 +6,7 @@ class OpenLoadIE(InfoExtractor):
 
     def _extract_from_webpage(self, url, webpage):
         video_id = url
-        url = self._html_search_regex(r'"file":\s*"(http.*?openload[^"]+)"', webpage, video_id)
+        url = self._html_search_regex(r'"file":\s*"(http.*?openload[^"]+)"', webpage, video_id, default=None)
         if url is None:
             return
 
