@@ -10,7 +10,6 @@ class ObrutIE(InfoExtractor):
         'url': 'https://54243ba5.obrut.show/embed/AO/kinopoisk/gNxcDNyMDN/?season=1&episode=1',
         'info_dict': {
             'id': 'AO/kinopoisk/gNxcDNyMDN/?season=1&episode=1',
-            'title': 'Расхитительница гробниц: Легенда о Ларе Крофт - S01E01 - Один шаг',
             'episode_number': 1,
             'formats': [{
                 'url': r'https://cdn-54243ba5.obrut.show/stream/AO/.*',
@@ -35,9 +34,12 @@ class ObrutIE(InfoExtractor):
         jsn = json.loads(data)
         desc = jsn['file'][0] # Use the first translation
         title = title + " - " + desc['t1']
-        params = dict(parse.parse_qsl(parse.urlparse(url).query))
 
-        result = dict(id=video_id, title=title, episode_number=int(params['episode']))
+        result = dict(id=video_id, title=title)
+        params = dict(parse.parse_qsl(parse.urlparse(url).query))
+        if params.get('episode'):
+            result['episode_number'] = int(params['episode'])
+
         result['formats'] = [{'url': url, 'quality': int(quality)}
                              for quality, url in re.findall(r'\[(\d+)p\]([^,]+)', desc['file'])]
 
