@@ -7,7 +7,7 @@ class JWPlayerIE(InfoExtractor):
 
     def _extract_from_webpage(self, url, webpage):
         video_id = url
-        jsn = next(self._yield_json_ld(webpage, video_id, default={}))
+        jsn = next(self._yield_json_ld(webpage, video_id, default={}), {})
         embedUrl = jsn.get("embedUrl", None)
         if embedUrl is None:
             return
