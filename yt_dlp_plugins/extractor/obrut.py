@@ -13,7 +13,7 @@ class ObrutIE(InfoExtractor):
             'episode_number': 1,
             'formats': [{
                 'url': r'https://cdn-54243ba5.obrut.show/stream/AO/.*',
-                'ext': 'unknown_video',
+                'ext': 'mp4',
                 'protocol': 'https'
             }]
         }
@@ -35,12 +35,14 @@ class ObrutIE(InfoExtractor):
         desc = jsn['file'][0] # Use the first translation
         title = title + " - " + desc['t1']
 
-        result = dict(id=video_id, title=title)
+        result = dict(id=video_id, title=title, _type='url')
         params = dict(parse.parse_qsl(parse.urlparse(url).query))
         if params.get('episode'):
             result['episode_number'] = int(params['episode'])
 
-        result['formats'] = [{'url': url, 'quality': int(quality)}
-                             for quality, url in re.findall(r'\[(\d+)p\]([^,]+)', desc['file'])]
+        urls = [dict(url=url, quality=int(q[:-1]))
+                for q, url in re.findall(r'\[(\d+p)\]([^,]+)', desc['file'])]
+        best = max(urls, key=lambda x: x['quality'])
+        result['url'], result['resolution'] = best['url'], f"{best['quality']}p"
 
         return result
