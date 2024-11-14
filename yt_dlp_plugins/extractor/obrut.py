@@ -1,7 +1,6 @@
 from yt_dlp.extractor.common import InfoExtractor
 from yt_dlp.utils.networking import random_user_agent
 import re, base64, json, sys
-from urllib import parse
 
 
 class ObrutIE(InfoExtractor):
@@ -19,6 +18,16 @@ class ObrutIE(InfoExtractor):
         }
     }]
 
+    @staticmethod
+    def _get_best_resolution_url(description):
+        url, res = None, 0
+        for s in description.split(','):
+            m = re.match(r"\[(\d+)p\](.+)", s)
+            if m is not None and int(m[1]) > res:
+                url, res = m[2], int(m[1])
+
+        return url
+
     def _real_extract(self, url):
         video_id = self._match_id(url)
         domain = self._search_regex(self._VALID_URL, url, "domain", group='domain')
@@ -30,19 +39,26 @@ class ObrutIE(InfoExtractor):
         data = self._html_search_regex(r'new Player\("#2t([^"]+)"', webpage, video_id)
         data = re.sub(r'//[^=]+=', '', data) # remove `//ci9yL3I=`-like parts
         data = base64.b64decode(data + '=' * (-len(data) % 4)) # fix padding
+        data = json.loads(data)
 
-        jsn = json.loads(data)
-        desc = jsn['file'][0] # Use the first translation
-        title = title + " - " + desc['t1']
+        urls = []
+        for season in data['file']:
+            for episode in season['folder']:
+                formats = []
+                hashset = set()
+                result = dict(id=episode['title'], season=season['title'], episode=episode['title'])
+                for translation in episode['folder']:
+                    result['title'] = f"{title} - {translation['t1']}"
+                    url = self._get_best_resolution_url(translation['file'])
+                    lang = translation['title']
+                    formatid = sum(map(ord, lang))
+                    while formatid in hashset:
+                        formatid += 1
 
-        result = dict(id=video_id, title=title, _type='url')
-        params = dict(parse.parse_qsl(parse.urlparse(url).query))
-        if params.get('episode'):
-            result['episode_number'] = int(params['episode'])
+                    hashset.add(formatid)
+                    formats.append(dict(ext='mp4', url=url, format_id=str(formatid), language=lang))
 
-        urls = [dict(url=url, quality=int(q[:-1]))
-                for q, url in re.findall(r'\[(\d+p)\]([^,]+)', desc['file'])]
-        best = max(urls, key=lambda x: x['quality'])
-        result['url'], result['resolution'] = best['url'], f"{best['quality']}p"
+                result['formats'] = formats
+                urls.append(result)
 
-        return result
+        return self.playlist_result(urls, video_id, title, playlist_count=len(urls))
