@@ -19,44 +19,49 @@ class ObrutIE(InfoExtractor):
     }]
 
     @staticmethod
-    def _get_best_resolution_url(description):
-        url, res = None, 0
-        for s in description.split(','):
-            m = re.match(r"\[(\d+)p\](.+)", s)
-            if m is not None and int(m[1]) > res:
-                url, res = m[2], int(m[1])
-
-        return url
-
-    @staticmethod
-    def _get_series_playlist(folder, title):
+    def _get_series_playlist(folder, title, fmttag):
         urls = []
         for season in folder:
             for episode in season['folder']:
-                hashset = set()
-                formats, eptitle = ObrutIE._get_video_formats(episode['folder'], title)
-                urls.append(dict(id=episode['title'], season=season['title'],
-                                 episode=episode['title'], title=eptitle, formats=formats))
+                desc = ObrutIE._get_video_formats(episode['folder'], title, fmttag,
+                                                  id=episode['title'],
+                                                  season=season['title'],
+                                                  episode=episode['title'])
+                urls.append(desc)
 
         return urls
 
     @staticmethod
-    def _get_video_formats(folder, title):
+    def _get_video_formats(folder, title, fmttag, **kwargs):
         hashset = set()
         formats, newtitle = [], title
         for translation in folder:
-            url = ObrutIE._get_best_resolution_url(translation['file'])
-            lang = translation['title']
-            formatid = sum(map(ord, lang))
-            while formatid in hashset:
-                formatid += 1
-
-            hashset.add(formatid)
-            formats.append(dict(ext='mp4', url=url, format_id=str(formatid), language=lang))
             if len(translation.get('t1', "")) > 0:
                 newtitle = f"{title} - {translation['t1']}"
 
-        return formats, newtitle
+            for s in translation['file'].split(','):
+                m = re.match(r"\[(\d+p)\](.+)", s)
+                if m is None:
+                    continue
+
+                res, url = m[1], m[2]
+                lang = translation['title']
+                formatid = sum(map(ord, lang + res))
+                while formatid in hashset:
+                    formatid += 1
+
+                hashset.add(formatid)
+                formats.append(dict(ext='mp4', url=url, resolution=res,
+                                    format_id=str(formatid), language=lang,
+                                    title=f"{newtitle} [{lang}]"))
+
+        if fmttag is not None:
+            for tag in fmttag:
+                for fmt in formats:
+                    if fmt['format_id'] == tag:
+                        return dict(**fmt, **kwargs, _type='url_transparent')
+
+        return dict(formats=formats, title=newtitle, **kwargs)
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
@@ -71,9 +76,12 @@ class ObrutIE(InfoExtractor):
         data = base64.b64decode(data + '=' * (-len(data) % 4)) # fix padding
         data = json.loads(data)
 
+        ftag = self._search_regex(r"ytdl-format=(?P<tag>[\d,]+)", video_id, "formattag", default=None, group="tag")
+        if ftag is not None:
+            ftag = ftag.split(',')
+
         if data['file'][0].get('folder') is not None:
-            urls = self._get_series_playlist(data['file'], title)
+            urls = self._get_series_playlist(data['file'], title, ftag)
             return self.playlist_result(urls, video_id, title, playlist_count=len(urls))
         else:
-            formats, _ = self._get_video_formats(data['file'], title)
-            return dict(id=video_id, title=title, formats=formats)
+            return self._get_video_formats(data['file'], title, ftag, id=video_id)
