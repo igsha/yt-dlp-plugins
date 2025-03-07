@@ -1,18 +1,20 @@
-{ lib, buildPythonPackage, setuptools, lxml }:
+{ lib, buildPythonPackage, setuptools, lxml }@args:
 
-buildPythonPackage {
+let
+  toml = builtins.fromTOML (builtins.readFile ./pyproject.toml);
+in buildPythonPackage {
   pname = "yt-dlp-plugins";
-  version = "2024.08.18";
-  format = "pyproject";
+  version = toml.project.version;
+  pyproject = true;
 
   src = ./.;
 
-  buildInputs = [ setuptools ]; # build-system
-  propagatedBuildInputs = [ lxml ]; # dependencies
+  build-system = builtins.map (x: args.${x}) toml.build-system.requires;
+  dependencies = builtins.map (x: args.${x}) toml.project.dependencies;
 
   meta = {
-    homepage = "https://github.com/igsha/yt-dlp-plugins";
-    description = "A yt-dlp plugins collection";
+    homepage = toml.project.urls.Homepage;
+    description = toml.project.description;
     license = lib.licenses.free;
     maintainers = with lib.maintainers; [ igsha ];
     platforms = lib.platforms.unix;

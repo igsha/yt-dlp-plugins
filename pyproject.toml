@@ -4,3 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [tool.distutils.bdist_wheel]
 universal = true
+
+[project]
+name = "yt-dlp-plugins"
+version = "2025.3.7"
+authors = [
+    {name = "Igor Sharonov"},
+]
+description = "A yt-dlp plugins collection"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "lxml",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Linux"
+]
+
+[project.urls]
+Homepage = "https://github.com/igsha/yt-dlp-plugins"
