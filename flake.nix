@@ -34,7 +34,7 @@
     packages.x86_64-linux = {
       yt-dlp-plugins = pkgs.python3Packages.yt-dlp-plugins;
       yt-dlp-with-plugins = pkgs.yt-dlp-with-plugins;
-      default = self.packages.x86_64-linux.yt-dlp-plugins;
+      default = self.packages.x86_64-linux.yt-dlp-with-plugins;
     };
     apps.x86_64-linux.default = {
       type = "app";

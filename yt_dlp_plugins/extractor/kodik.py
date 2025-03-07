@@ -6,15 +6,6 @@ from lxml import etree
 
 class KodikIE(InfoExtractor):
     _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/ftor\?(?P<item>.+)'
-    _decode_table = {
-            **{c: c + 13 if c < ord('N') else c - 13 for c in range(ord('A'), ord('Z') + 1)},
-            **{c: c + 13 if c < ord('n') else c - 13 for c in range(ord('a'), ord('z') + 1)}}
-
-    @staticmethod
-    def __decode(data):
-        data = data.translate(__class__._decode_table)
-        decoded = base64.b64decode(data + '=' * (-len(data) % 4)) # fix padding
-        return re.sub(r'^//', 'https://', decoded.decode())
 
     def _real_extract(self, url):
         item = dict(parse.parse_qsl(re.search(self._VALID_URL, url).group('item')))
@@ -28,7 +19,8 @@ class KodikIE(InfoExtractor):
         else:
             video_urls = jsn['links']
             qualities = sorted(video_urls.keys(), key=int, reverse=True)
-            result['formats'] = [{'url': self.__decode(video_urls[k][0]['src']), 'quality': int(k)}
+            getsrc = lambda k: re.sub(r'^//', 'https://', video_urls[k][0]['src'])
+            result['formats'] = [{'url': getsrc(k), 'quality': int(k)}
                                  for k in qualities]
 
         return result

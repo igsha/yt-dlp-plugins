@@ -1,4 +1,6 @@
-This repository contains a collection of extractors for [yt-dlp](https://github.com/yt-dlp/yt-dlp#readme). 
+# yt-dlp-plugins
+
+This repository contains a collection of extractors for [yt-dlp](https://github.com/yt-dlp/yt-dlp#readme).
 
 See [yt-dlp plugins](https://github.com/yt-dlp/yt-dlp#plugins) for more details.
 
