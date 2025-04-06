@@ -7,6 +7,27 @@ from lxml import etree
 class KodikIE(InfoExtractor):
     _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/ftor\?(?P<item>.+)'
 
+    @staticmethod
+    def __rotenumerate(data):
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        rotated = alphabet
+        for r in range(25):
+            rotated = rotated[1:] + rotated[0]
+            trans = str.maketrans(alphabet + alphabet.lower(), rotated + rotated.lower())
+            transformed = data.translate(trans)
+            decoded = base64.b64decode(transformed + '=' * (-len(transformed) % 4)) # fix padding
+            if decoded.endswith(b".m3u8"):
+                return decoded.decode()
+
+        raise RuntimeError("Exhausted rot tries")
+
+    @staticmethod
+    def __decode(data):
+        if not data.endswith(".m3u8"):
+            data = __class__.__rotenumerate(data)
+
+        return re.sub(r'^//', 'https://', data)
+
     def _real_extract(self, url):
         item = dict(parse.parse_qsl(re.search(self._VALID_URL, url).group('item')))
         webpage = self._download_webpage(url, item['id'])
@@ -19,8 +40,7 @@ class KodikIE(InfoExtractor):
         else:
             video_urls = jsn['links']
             qualities = sorted(video_urls.keys(), key=int, reverse=True)
-            getsrc = lambda k: re.sub(r'^//', 'https://', video_urls[k][0]['src'])
-            result['formats'] = [{'url': getsrc(k), 'quality': int(k)}
+            result['formats'] = [{'url': self.__decode(video_urls[k][0]['src']), 'quality': int(k)}
                                  for k in qualities]
 
         return result
