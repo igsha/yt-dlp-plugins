@@ -1,5 +1,6 @@
 from yt_dlp.extractor.common import InfoExtractor
 from urllib import parse
+import sys
 
 
 class JWPlayerIE(InfoExtractor):
@@ -19,11 +20,17 @@ class JWPlayerIE(InfoExtractor):
         if webpage is None:
             return
 
-        jsn = self._search_json(r"window.playlist\s*=\s*", webpage, "JSON playlist", video_id,
-                                end_pattern=";", default=None)
-        if jsn is None:
+        self.report_extraction(embedUrl)
+        video_url = self._search_regex(r"video_url:\s*'([^']+)", webpage, "video_url")
+        resolution = self._search_regex(r"video_url_text:\s*'([^']+)", webpage, "video_url_text")
+        if video_url is None:
             return
 
-        formats = [dict(url=s["file"], quality=int(s["label"]), ext=s["type"])
-                   for s in jsn["sources"]]
+        formats = [dict(url=video_url, quality=int(resolution[:-1]), resolution=resolution, ext="mp4")]
+
+        video_url = self._search_regex(r"video_alt_url:\s*'([^']+)", webpage, "video_alt_url")
+        resolution = self._search_regex(r"video_alt_url_text:\s*'([^']+)", webpage, "video_alt_url_text")
+        if video_url is not None:
+            formats.append(dict(url=video_url, quality=int(resolution[:-1]), resolution=resolution, ext="mp4"))
+
         yield dict(id=video_id, title=title, formats=formats)
