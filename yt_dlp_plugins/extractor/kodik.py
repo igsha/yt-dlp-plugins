@@ -5,7 +5,7 @@ from lxml import etree
 
 
 class KodikIE(InfoExtractor):
-    _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/ftor\?(?P<item>.+)'
+    _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod|kodikplayer)\.[^/]+)/ftor\?(?P<item>.+)'
 
     @staticmethod
     def __rotenumerate(data):
@@ -47,7 +47,7 @@ class KodikIE(InfoExtractor):
 
 
 class KodikVideoIE(InfoExtractor):
-    _VALID_URL = r'(?P<domain>(?:https?:)?(?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/(video|seria)/(?P<id>[-\w/]+)(?:\?.*)?'
+    _VALID_URL = r'(?P<domain>(?:https?:)?(?://)?(?:www\.)?(kodik|aniqit|anivod|kodikplayer)\.[^/]+)/(video|seria)/(?P<id>[-\w/]+)(?:\?.*)?'
     _EMBED_REGEX = [rf'(?x)<iframe[^>]+src=["\'](?P<url>{_VALID_URL})']
 
     def _real_extract(self, url):
@@ -71,7 +71,7 @@ class KodikVideoIE(InfoExtractor):
 
 
 class KodikListIE(InfoExtractor):
-    _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod)\.[^/]+)/(?P<type>(serial|season))/(?P<id>[-\w/]+)'
+    _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?(kodik|aniqit|anivod|kodikplayer)\.[^/]+)/(?P<type>(serial|season))/(?P<id>[-\w/]+)'
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
