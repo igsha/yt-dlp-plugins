@@ -11,9 +11,9 @@ class CdnVideoHubListIE(InfoExtractor):
         lst = self._download_json(url, items['pub'])
         title = lst['titleName']
         self.report_extraction(title)
-        dubbing_code = items.get('dubbing_code', lst['items'][0]['voiceStudio'])
+        dubbing_code = items.get('dubbing_code', lst['items'][0].get('voiceStudio', 'voiceType'))
         urls = []
-        for item in filter(lambda x: x['voiceStudio'] == dubbing_code, lst['items']):
+        for item in filter(lambda x: x.get('voiceStudio', 'voiceType') == dubbing_code, lst['items']):
             stitle = f"{title} - {item['season']}-{item['episode']}"
             urls.append(self.url_result(f"https://plapi.cdnvideohub.com/api/v1/player/sv/video/{item['vkId']}", ie=CdnVideoHubIE.ie_key(), title=stitle))
 
