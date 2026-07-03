@@ -5,9 +5,12 @@ build-backend = "setuptools.build_meta"
 [tool.distutils.bdist_wheel]
 universal = true
 
+[tool.setuptools.packages.find]
+where = ["janus"]
+
 [project]
 name = "yt-dlp-plugins"
-version = "2025.3.7"
+version = "2026.7.3"
 authors = [
     {name = "Igor Sharonov"},
 ]

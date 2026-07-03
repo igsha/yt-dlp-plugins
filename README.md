@@ -4,6 +4,10 @@ This repository contains a collection of extractors for [yt-dlp](https://github.
 
 See [yt-dlp plugins](https://github.com/yt-dlp/yt-dlp#plugins) for more details.
 
+## Simple hookup
+
+Just clone this repo to your `$HOME` directory (clonned repo should be called `yt-dlp-plugins`).
+Be sure that `~/yt-dlp-plugins/janus` directory is in right place.
 
 ## Installation
 
@@ -15,7 +19,6 @@ python3 -m pip install -U https://github.com/igsha/yt-dlp-plugins/archive/master
 ```
 
 See [installing yt-dlp plugins](https://github.com/yt-dlp/yt-dlp#installing-plugins) for the other methods this plugin package can be installed.
-
 
 ## Development
 

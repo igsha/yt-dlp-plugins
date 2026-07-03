@@ -2,6 +2,7 @@
 
 let
   toml = builtins.fromTOML (builtins.readFile ./pyproject.toml);
+
 in buildPythonPackage {
   pname = "yt-dlp-plugins";
   version = toml.project.version;
