@@ -1,4 +1,4 @@
-{ lib, buildPythonPackage, setuptools, lxml }@args:
+{ lib, buildPythonPackage, setuptools }@args:
 
 let
   toml = builtins.fromTOML (builtins.readFile ./pyproject.toml);

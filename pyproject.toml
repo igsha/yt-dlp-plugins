@@ -18,7 +18,6 @@ description = "A yt-dlp plugins collection"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "lxml",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

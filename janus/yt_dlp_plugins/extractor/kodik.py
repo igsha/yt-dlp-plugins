@@ -1,7 +1,7 @@
 from yt_dlp.extractor.common import InfoExtractor
+from yt_dlp.utils import get_element_html_by_class, get_elements_text_and_html_by_attribute, extract_attributes
 from urllib import parse
 import re, json, sys, base64
-from lxml import etree
 
 
 class KodikIE(InfoExtractor):
@@ -78,13 +78,13 @@ class KodikListIE(InfoExtractor):
         domain = self._search_regex(self._VALID_URL, url, "domain", group='domain')
 
         webpage = self._download_webpage(url, video_id, headers={'referer': domain})
-        t = etree.HTML(webpage)
-        title = t.xpath("//title/text()")[0]
-        items = t.xpath("//div[@class='serial-series-box']/*/option")
+        title = self._html_extract_title(webpage, default="")
+        series_box = get_element_html_by_class("serial-series-box", webpage)
 
         self.report_extraction(title)
         urls = []
-        for item in items:
+        for (text, item) in get_elements_text_and_html_by_attribute("data-id", r".*", webpage, tag="option", escape_value=False):
+            item = extract_attributes(item)
             # episode and title is a fake arguments
             params = {k:item.get(v) for k, v in [('id', 'data-id'), ('hash', 'data-hash'), ('episode', 'value')]}
             params['title'] = title + " - " + item.get('data-title')
