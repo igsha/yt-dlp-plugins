@@ -10,7 +10,7 @@ where = ["janus"]
 
 [project]
 name = "yt-dlp-plugins"
-version = "2026.7.3"
+version = "2026.08.08"
 authors = [
     {name = "Igor Sharonov"},
 ]
