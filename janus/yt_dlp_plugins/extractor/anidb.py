@@ -5,7 +5,7 @@ import re
 from urllib import parse
 
 
-class AnyDBIE(InfoExtractor):
+class AnidbIE(InfoExtractor):
     # https://anidb.app/anime/<name>-<id>[?lang=eng|jpn][&movie=<id>]
     _VALID_URL = r'(?P<domain>(?:https?://)?(?:www\.)?anidb\.app)/anime/[^/]+-(?P<id>[\d]+)'
 
@@ -15,7 +15,8 @@ class AnyDBIE(InfoExtractor):
         self.report_extraction("Download languages")
         video_id = urlquery['movie']
         jsn = self._download_json(f"https://anidb.app/api/frontend/episode/{video_id}/languages", video_id, headers=headers)
-        lang = urlquery.get('lang', None)
+        lang = urlquery.get('lang', None) or self._configuration_arg('lang', default=[None])[0]
+        self.report_extraction(f"LANG {lang}")
         if lang is None:
             jsnpart = jsn['languages'][0]
         else:
@@ -47,7 +48,7 @@ class AnyDBIE(InfoExtractor):
         def parse_episode(episode):
             newitems = {'movie': ep['id'], 'episode': ep['number'], **urlquery}
             q = parse.urlencode(newitems)
-            return self.url_result(purl._replace(query=q).geturl(), title=f"{title} - {ep['number']}", ie='AnyDB')
+            return self.url_result(purl._replace(query=q).geturl(), title=f"{title} - {ep['number']}", ie='Anidb')
 
         if 'episode' in urlquery:
             n = int(urlquery['episode'])
@@ -58,7 +59,7 @@ class AnyDBIE(InfoExtractor):
         for ep in jsn['episodes']:
             newitems = {'movie': ep['id'], 'episode': ep['number'], **urlquery}
             q = parse.urlencode(newitems)
-            urls.append(self.url_result(purl._replace(query=q).geturl(), title=f"{title} - {ep['number']}", ie='AnyDB'))
+            urls.append(self.url_result(purl._replace(query=q).geturl(), title=f"{title} - {ep['number']}", ie='Anidb'))
 
         return self.playlist_result(urls, video_id, title, playlist_count=len(urls))
 
